@@ -3,11 +3,12 @@ BLOCK-LEVEL ON ERROR UNDO, THROW.
 USING xUnit.TestCase.
 USING OpenEdge.Core.Assert.
 
+USING xUnit.ITestResult.
 USING xUnit.TestResult.
 
 CLASS xUnit.tests.TestResultTest INHERITS TestCase :
 
-  DEFINE PRIVATE PROPERTY oTestResult AS TestResult NO-UNDO GET. SET.
+  DEFINE PRIVATE PROPERTY oTestResult AS ITestResult NO-UNDO GET. SET.
 
   DEFINE VARIABLE lSuccess AS LOGICAL NO-UNDO.
 
@@ -21,7 +22,7 @@ CLASS xUnit.tests.TestResultTest INHERITS TestCase :
     SUPER(methodName).
   END CONSTRUCTOR.
 
-  METHOD PUBLIC OVERRIDE LOGICAL setUp
+  METHOD PUBLIC OVERRIDE VOID setUp
     ():
     THIS-OBJECT:oTestResult = NEW TestResult().
   END METHOD.
@@ -74,7 +75,7 @@ CLASS xUnit.tests.TestResultTest INHERITS TestCase :
     Assert:Equals(oTestResult:summary(), cSummary).
   END METHOD.
 
-  METHOD PUBLIC OVERRIDE LOGICAL tearDown
+  METHOD PUBLIC OVERRIDE VOID tearDown
     ():
     IF VALID-OBJECT(oTestResult) THEN DELETE OBJECT oTestResult.
   END METHOD.

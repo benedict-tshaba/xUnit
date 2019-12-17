@@ -1,17 +1,20 @@
 BLOCK-LEVEL ON ERROR UNDO, THROW.
 
+USING xUnit.ITestCase.
 USING xUnit.TestCase.
+USING xUnit.ITestResult.
 USING xUnit.TestResult.
+USING xUnit.ITestSuite.
 USING xUnit.TestSuite.
 USING OpenEdge.Core.Assert.
 
 CLASS xUnit.tests.TestCaseTest INHERITS TestCase :
 
-  DEFINE PRIVATE PROPERTY oTestCase   AS TestCase   NO-UNDO GET. SET.
-  DEFINE PRIVATE PROPERTY oTestResult AS TestResult NO-UNDO GET. SET.
-  DEFINE PRIVATE PROPERTY oTestSuite  AS TestSuite  NO-UNDO GET. SET.
-  DEFINE PRIVATE PROPERTY WasRun      AS LOGICAL    NO-UNDO GET. SET.
-  DEFINE PRIVATE PROPERTY TestLog     AS CHARACTER  NO-UNDO GET. SET.
+  DEFINE PRIVATE PROPERTY oTestCase   AS ITestCase   NO-UNDO GET. SET.
+  DEFINE PRIVATE PROPERTY oTestResult AS ITestResult NO-UNDO GET. SET.
+  DEFINE PRIVATE PROPERTY oTestSuite  AS ITestSuite  NO-UNDO GET. SET.
+  DEFINE PRIVATE PROPERTY WasRun      AS LOGICAL     NO-UNDO GET. SET.
+  DEFINE PRIVATE PROPERTY TestLog     AS CHARACTER   NO-UNDO GET. SET.
 
   DEFINE VARIABLE lSuccess AS LOGICAL NO-UNDO.
 
@@ -25,13 +28,23 @@ CLASS xUnit.tests.TestCaseTest INHERITS TestCase :
     SUPER(methodName).
   END CONSTRUCTOR.
 
-  METHOD PUBLIC OVERRIDE LOGICAL setUp
+  METHOD PUBLIC OVERRIDE VOID before
     ():
     THIS-OBJECT:oTestCase   = NEW TestCase().
     THIS-OBJECT:oTestResult = NEW TestResult().
     THIS-OBJECT:oTestSuite  = NEW TestSuite().
+  END METHOD.
+
+  METHOD PUBLIC OVERRIDE VOID setUp
+    ():
     THIS-OBJECT:WasRun = TRUE.
     THIS-OBJECT:TestLog = "setUp ".
+  END METHOD.
+
+  METHOD PUBLIC OVERRIDE VOID tearDown
+    ():
+    THIS-OBJECT:WasRun = FALSE.
+    THIS-OBJECT:TestLog = "tearDown ".
   END METHOD.
 
   METHOD PUBLIC LOGICAL testMethod
@@ -45,9 +58,15 @@ CLASS xUnit.tests.TestCaseTest INHERITS TestCase :
 
   METHOD PUBLIC LOGICAL testSetUpWasRun
     ():
-    oTestCase:run(oTestResult).
     Assert:Equals(TRUE, THIS-OBJECT:WasRun).
     Assert:Equals("setUp ", THIS-OBJECT:TestLog).
+  END METHOD.
+
+  METHOD PUBLIC LOGICAL testBeforeWasRun
+    ():
+    Assert:IsTrue(VALID-OBJECT(THIS-OBJECT:oTestCase)).
+    Assert:IsTrue(VALID-OBJECT(THIS-OBJECT:oTestResult)).
+    Assert:IsTrue(VALID-OBJECT(THIS-OBJECT:oTestSuite)).
   END METHOD.
 
   METHOD PUBLIC LOGICAL testTemplateMethod
@@ -56,7 +75,6 @@ CLASS xUnit.tests.TestCaseTest INHERITS TestCase :
       WasRun  = TRUE
       TestLog = TestLog + "testTemplateMethod ".
 
-    oTestCase:run(oTestResult).
     Assert:Equals("setUp testTemplateMethod", THIS-OBJECT:TestLog).
   END METHOD.
 
@@ -73,14 +91,11 @@ CLASS xUnit.tests.TestCaseTest INHERITS TestCase :
     oTestSuite:register(NEW xUnit.tests.TestResultTest()).
     oTestSuite:register(NEW xUnit.tests.TestSuiteTest()).
     oTestSuite:runAll().
-    Assert:Equals("7 run, 0 failed.", oTestSuite:TestResults:SUMMARY()).
+    Assert:Equals("9 run, 0 failed.", oTestSuite:TestResults:SUMMARY()).
   END METHOD.
 
-  METHOD PUBLIC OVERRIDE LOGICAL tearDown
+  METHOD PUBLIC OVERRIDE VOID after
     ():
-    ASSIGN 
-      WasRun  = TRUE
-      TestLog = TestLog + "tearDown ".
     IF VALID-OBJECT(oTestCase)   THEN DELETE OBJECT oTestCase.
     IF VALID-OBJECT(oTestResult) THEN DELETE OBJECT oTestResult.
     IF VALID-OBJECT(oTestSuite)  THEN DELETE OBJECT oTestSuite.

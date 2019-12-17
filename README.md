@@ -1,4 +1,4 @@
-# xUnit v0.0.1 - Tshaba Phomolo Benedict
+# xUnit v1.0.0 - Tshaba Phomolo Benedict
 ## xUnit is a Beta Unit Testing 'Framework' for Progress ABL Code
 ### 'Framework' is in quotes because, this really doesn't come close to an actual Framework
 

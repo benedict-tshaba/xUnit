@@ -5,14 +5,14 @@ BLOCK-LEVEL ON ERROR UNDO, THROW.
 *  this code in isolation, you must instantiate it and pass it in the run
 *  method of a TestCase instance.
 *  Author: Tshaba Phomolo Benedict
-*  Version: 0.0.1-2019
+*  Version: 1.0.0-2019
 *  Notes: Do not modify this code unless;
 *       a) You know what you're doing.
 *       b) You have done this before.
 *       c) You're me :-)
 */
 
-CLASS xUnit.TestResult :
+CLASS xUnit.TestResult IMPLEMENTS xUnit.ITestResult :
 
   DEFINE PRIVATE PROPERTY RunCount   AS INTEGER   NO-UNDO GET. SET.
   DEFINE PRIVATE PROPERTY FailCount  AS INTEGER   NO-UNDO GET. SET.
@@ -27,7 +27,7 @@ CLASS xUnit.TestResult :
 
   END CONSTRUCTOR.
 
-  METHOD PUBLIC LOGICAL testStarted
+  METHOD PUBLIC VOID testStarted
     ():
 
     ASSIGN
@@ -35,9 +35,9 @@ CLASS xUnit.TestResult :
 
   END METHOD.
 
-  METHOD PUBLIC LOGICAL testFailed
+  METHOD PUBLIC VOID testFailed
     ( INPUT test AS CHARACTER,
-      INPUT err  AS Progress.Lang.ERROR ):
+      INPUT err  AS Progress.Lang.Error ):
 
     DEFINE VARIABLE iNumMessages AS INTEGER NO-UNDO.
 

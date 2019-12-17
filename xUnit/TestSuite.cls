@@ -4,7 +4,7 @@ BLOCK-LEVEL ON ERROR UNDO, THROW.
 *  The TestSuite Class, you use this baby to run a whole lot of tests from your
 *  TestCases all in one go. And the results are compiled and provided in the end.
 *  Author: Tshaba Phomolo Benedict
-*  Version: 0.0.1-2019
+*  Version: 1.0.0-2019
 *  Notes: Do not modify this code unless;
 *       a) You know what you're doing.
 *       b) You have done this before.
@@ -13,13 +13,14 @@ BLOCK-LEVEL ON ERROR UNDO, THROW.
 
 USING Progress.Lang.*.
 
-USING xUnit.TestCase.
+USING xUnit.ITestCase.
+USING xUnit.ITestResult.
 USING xUnit.TestResult.
 
-CLASS xUnit.TestSuite :
+CLASS xUnit.TestSuite IMPLEMENTS xUnit.ITestSuite:
 
-  DEFINE PRIVATE PROPERTY TestSeq     AS INTEGER    NO-UNDO GET. SET.
-  DEFINE PUBLIC  PROPERTY TestResults AS TestResult NO-UNDO GET. SET.
+  DEFINE PRIVATE PROPERTY TestSeq     AS INTEGER     NO-UNDO GET. SET.
+  DEFINE PUBLIC  PROPERTY TestResults AS ITestResult NO-UNDO GET. SET.
 
   DEFINE PRIVATE TEMP-TABLE ttTests
     FIELD iPK  AS INTEGER
@@ -65,8 +66,8 @@ CLASS xUnit.TestSuite :
 
   END DESTRUCTOR.
 
-  METHOD PUBLIC LOGICAL register
-    ( INPUT testCase AS TestCase ):
+  METHOD PUBLIC VOID register
+    ( INPUT testCase AS ITestCase ):
 
     CREATE ttAllTests.
     ASSIGN
@@ -76,8 +77,8 @@ CLASS xUnit.TestSuite :
 
   END METHOD.
 
-  METHOD PUBLIC LOGICAL add
-    ( INPUT test AS TestCase ):
+  METHOD PUBLIC VOID add
+    ( INPUT test AS ITestCase ):
 
     CREATE ttTests.
     ASSIGN
@@ -87,20 +88,20 @@ CLASS xUnit.TestSuite :
 
   END METHOD.
 
-  METHOD PUBLIC LOGICAL run
+  METHOD PUBLIC VOID run
     ():
 
     FOR EACH ttTests:
-      CAST(ttTests.Test, TestCase):RUN(THIS-OBJECT:TestResults).
+      CAST(ttTests.Test, ITestCase):RUN(THIS-OBJECT:TestResults).
     END.
 
   END METHOD.
 
-  METHOD PUBLIC LOGICAL runAll
+  METHOD PUBLIC VOID runAll
     ():
 
     FOR EACH ttAllTests:
-      CAST(ttAllTests.TestCaseInstance, TestCase):runAll(THIS-OBJECT:TestResults).
+      CAST(ttAllTests.TestCaseInstance, ITestCase):runAll(THIS-OBJECT:TestResults).
     END.
 
   END METHOD.

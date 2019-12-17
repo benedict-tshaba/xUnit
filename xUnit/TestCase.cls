@@ -3,7 +3,7 @@ BLOCK-LEVEL ON ERROR UNDO, THROW.
 /* TestCase.cls
 *  The TestCase SuperClass, every unit test case class inherits this bad boy
 *  Author: Tshaba Phomolo Benedict
-*  Version: 0.0.1-2019
+*  Version: 1.0.0-2019
 *  Notes: Do not modify this code unless;
 *       a) You know what you're doing.
 *       b) You have done this before.
@@ -13,13 +13,13 @@ BLOCK-LEVEL ON ERROR UNDO, THROW.
 USING Progress.Lang.*. 
 USING Progress.Reflect.*. 
 
-USING xUnit.TestResult.
+USING xUnit.ITestResult.
 
-CLASS xUnit.TestCase :
+CLASS xUnit.TestCase IMPLEMENTS xUnit.ITestCase:
 
-  DEFINE PRIVATE PROPERTY TestName    AS CHARACTER  NO-UNDO GET. SET.
-  DEFINE PUBLIC  PROPERTY TestResults AS TestResult NO-UNDO GET. SET.
-  DEFINE PRIVATE VARIABLE lReturnVal  AS LOGICAL    NO-UNDO.
+  DEFINE PRIVATE PROPERTY TestName    AS CHARACTER   NO-UNDO GET. SET.
+  DEFINE PUBLIC  PROPERTY TestResults AS ITestResult NO-UNDO GET. SET.
+  DEFINE PRIVATE VARIABLE lReturnVal  AS LOGICAL     NO-UNDO.
 
   CONSTRUCTOR TestCase
     ( INPUT testName AS CHARACTER ):
@@ -33,30 +33,35 @@ CLASS xUnit.TestCase :
     ():
   END CONSTRUCTOR.
 
-  METHOD PUBLIC LOGICAL setUp
+  METHOD PUBLIC VOID before
     ():
   END METHOD.
 
-  METHOD PUBLIC LOGICAL run
-    ( INPUT oResult AS TestResult ):
+  METHOD PUBLIC VOID setUp
+    ():
+  END METHOD.
+
+  METHOD PUBLIC VOID run
+    ( INPUT oResult AS ITestResult ):
 
     ASSIGN
-      THIS-OBJECT:TestResults = oResult
-      lReturnVal              = THIS-OBJECT:TestResults:testStarted()
-      lReturnVal              = THIS-OBJECT:setUp()
-      lReturnVal              = DYNAMIC-INVOKE(THIS-OBJECT, THIS-OBJECT:TestName).
+      THIS-OBJECT:TestResults = oResult.
+
+    THIS-OBJECT:TestResults:testStarted().
+    THIS-OBJECT:setUp().
+    DYNAMIC-INVOKE(THIS-OBJECT, THIS-OBJECT:TestName).
 
     CATCH err AS Progress.Lang.ERROR:
-      lReturnVal              = THIS-OBJECT:TestResults:testFailed(THIS-OBJECT:TestName, err).
+      THIS-OBJECT:TestResults:testFailed(THIS-OBJECT:TestName, err).
     END CATCH.
 
     FINALLY:
-      lReturnVal              = THIS-OBJECT:tearDown().
+      THIS-OBJECT:tearDown().
     END FINALLY.
   END METHOD.
 
-  METHOD PUBLIC LOGICAL runAll
-    ( INPUT oResult AS TestResult ):
+  METHOD PUBLIC VOID runAll
+    ( INPUT oResult AS ITestResult ):
 
     DEFINE VARIABLE oMethods AS CLASS Method   EXTENT NO-UNDO.
     DEFINE VARIABLE iMax     AS INTEGER NO-UNDO.
@@ -66,6 +71,8 @@ CLASS xUnit.TestCase :
       EXTENT(oMethods) = ?
       oMethods         = THIS-OBJECT:GetClass():GetMethods()
       iMax             = EXTENT(oMethods).
+    
+    THIS-OBJECT:before().
 
     DO iLoop = 1 TO iMax:
       IF oMethods[iLoop]:NAME BEGINS "test":U
@@ -75,9 +82,15 @@ CLASS xUnit.TestCase :
       END.
     END.
 
+    THIS-OBJECT:after().
+
   END METHOD.
 
-  METHOD PUBLIC LOGICAL tearDown
+  METHOD PUBLIC VOID tearDown
+    ():
+  END METHOD.
+
+  METHOD PUBLIC VOID after
     ():
   END METHOD.
 
